@@ -1,8 +1,8 @@
 /* 어디서나 SOS — 오프라인 캐시
    원리: 처음 접속할 때 앱 파일을 폰에 저장해 두고, 그 뒤로는 인터넷이 없어도 저장본으로 연다.
    인터넷이 되면 뒤에서 새 버전을 받아 다음에 열 때 반영한다. */
-const CACHE = "sos-v3";
-const FILES = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"];
+const CACHE = "sos-v4";
+const FILES = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png", "./privacy.html"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
