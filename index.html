@@ -51,6 +51,13 @@ button,select,input{font:inherit;color:inherit;letter-spacing:inherit}
 .brand{font-weight:800;font-size:19px;letter-spacing:-.03em}
 .country{font-size:26px;font-weight:700;line-height:1.2;letter-spacing:-.03em;margin:2px 0 0;text-wrap:balance}
 .country small{font-weight:500;font-size:13px;color:var(--muted);margin-left:6px;letter-spacing:0}
+.tip{border:1px solid var(--line2);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.tip-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tip-h b{font-size:14px;font-weight:700}
+.tip-x{border:0;background:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0 4px 8px}
+.tip p{margin:0;font-size:13px;line-height:1.55;color:var(--ink2)}
+.tip-how{background:var(--fill);border-radius:8px;padding:8px 10px;font-size:12.5px!important;color:var(--muted)!important}
+.tip.ready b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:1px}
 .offline{margin:0;font-size:12px;color:var(--warn-fg);background:var(--warn-bg);padding:8px 12px;border-radius:8px}
 .status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--muted2);flex:none}
@@ -167,6 +174,11 @@ footer a{color:var(--muted)}
     </div>
     <h1 class="country" id="countryName">—</h1>
     <p class="offline" id="offline" hidden>오프라인 · 저장된 번호로 표시 중 (전화는 걸려요, 지도는 안 열려요)</p>
+    <div class="tip" id="tip" hidden>
+      <div class="tip-h"><b id="tipTitle">출국 전에 한 번만 열어 두세요</b><button type="button" class="tip-x" id="tipClose" aria-label="안내 닫기">닫기</button></div>
+      <p id="tipBody">한 번 열면 폰에 저장돼서 현지에서 인터넷이 없어도 번호가 뜹니다. 홈 화면에 추가하면 앱처럼 열리고 위치 권한도 유지돼요.</p>
+      <p class="tip-how" id="tipHow"></p>
+    </div>
     <div class="controls">
       <label for="countrySel" class="sr" style="position:absolute;left:-9999px">나라 선택</label>
       <select id="countrySel"></select>
@@ -526,8 +538,7 @@ function renderNear(){
     let url;
     if(c==="KR") url="https://map.naver.com/p/search/"+encodeURIComponent(q);
     else if(c==="CN") url="https://uri.amap.com/search?keyword="+encodeURIComponent(q)+(has?`&center=${state.lng},${state.lat}`:"")+"&view=map&src=sos";
-    else url=has?`https://www.google.com/maps/search/${encodeURIComponent(q)}/@${state.lat},${state.lng},14z`
-                :"https://www.google.com/maps/search/"+encodeURIComponent(q+" near me");
+    else url="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(has?q:q+" near me")+(has?`&center=${state.lat},${state.lng}`:"");
     return `<a href="${url}" target="_blank" rel="noopener"><b>${ko}</b><span>${esc(sub)}</span></a>`;
   }).join("");
   $("#nearHint").textContent = c==="KR"?"네이버 지도로 열려요":c==="CN"?"가오더 지도로 열려요":has?"내 위치 기준 지도":"지도 앱이 위치를 물어봐요";
@@ -600,6 +611,27 @@ locate();        // 이어서: GPS로 다듬는다
 if("serviceWorker" in navigator && location.protocol==="https:"){
   navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
+/* 첫 방문 안내: 홈 화면 추가 + 오프라인 저장 */
+(function(){
+  const tip=$("#tip"); if(!tip) return;
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone===true;
+  const ua=navigator.userAgent;
+  const ios=/iPhone|iPad|iPod/.test(ua), android=/Android/.test(ua);
+  const dismissed=store.get("sos.tipDismissed",false);
+  if(dismissed) return;
+  $("#tipHow").textContent = standalone ? "" :
+    ios ? "아이폰: 사파리 아래 공유 버튼(⬆) → \"홈 화면에 추가\"" :
+    android ? "안드로이드: 크롬 메뉴(⋮) → \"홈 화면에 추가\"" :
+    "폰에서 열면 홈 화면에 추가하는 방법을 안내해요.";
+  if(standalone){ $("#tipTitle").textContent="홈 화면에 추가됐어요"; $("#tipBody").textContent="이제 인터넷이 없어도 열립니다. 출국 전 한 번 열어 두면 현지에서 바로 써요."; $("#tipHow").hidden=true; }
+  tip.hidden=false;
+  // 오프라인 저장 완료되면 표시 바꿈
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.ready.then(()=>{ tip.classList.add("ready"); if(!standalone) $("#tipTitle").textContent="오프라인 저장 완료 · 홈 화면에도 추가하세요"; }).catch(()=>{});
+  }
+  $("#tipClose").addEventListener("click",()=>{ tip.hidden=true; store.set("sos.tipDismissed",true); });
+})();
+
 /* 오프라인 표시 */
 function netState(){document.documentElement.dataset.offline=navigator.onLine?"":"1";const o=$("#offline");if(o)o.hidden=navigator.onLine;}
 addEventListener("online",netState);addEventListener("offline",netState);netState();
