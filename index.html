@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14202B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="어디서나 SOS">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>어디서나 SOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: 흰 바탕 세로 1열, 섹션은 연회색 띠로 구분, 항목은 1px 가는 선으로만 나눔 (카드·그림자 없음) */
+:root{
+  --bg:#FFFFFF; --band:#F4F4F4; --ink:#222222; --ink2:rgba(34,34,34,.8); --muted:rgba(34,34,34,.5); --muted2:rgba(34,34,34,.3);
+  --line:#EBEBEB; --line2:#D3D3D3; --fill:#F4F4F4;
+  --black:#222222; --on-black:#FFFFFF;
+  --red:#EF6253; --green:#41B979; --warn-bg:#FFF4D6; --warn-fg:#7A5300;
+  --show-bg:#FFD43B; --show-fg:#111111; --show-line:rgba(17,17,17,.25);
+  --f-body:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161616; --band:#0E0E0E; --ink:#F2F2F2; --ink2:rgba(242,242,242,.85); --muted:rgba(242,242,242,.5); --muted2:rgba(242,242,242,.3);
+  --line:#2A2A2A; --line2:#3A3A3A; --fill:#222222; --black:#F2F2F2; --on-black:#161616;
+  --warn-bg:#3A2F12; --warn-fg:#F4D27A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#161616; --band:#0E0E0E; --ink:#F2F2F2; --ink2:rgba(242,242,242,.85); --muted:rgba(242,242,242,.5); --muted2:rgba(242,242,242,.3);
+  --line:#2A2A2A; --line2:#3A3A3A; --fill:#222222; --black:#F2F2F2; --on-black:#161616;
+  --warn-bg:#3A2F12; --warn-fg:#F4D27A; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--band);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;letter-spacing:-.01em;
+  padding-inline:0;padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px);-webkit-tap-highlight-color:transparent}
+.wrap{max-width:480px;margin:0 auto;background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit}
+button,select,input{font:inherit;color:inherit;letter-spacing:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* 상단 */
+.where{display:flex;flex-direction:column;gap:12px;padding:12px 16px 18px}
+.where-top{display:flex;align-items:center;justify-content:space-between;gap:12px;height:28px}
+.brand{font-weight:800;font-size:19px;letter-spacing:-.03em}
+.country{font-size:26px;font-weight:700;line-height:1.2;letter-spacing:-.03em;margin:2px 0 0;text-wrap:balance}
+.country small{font-weight:500;font-size:13px;color:var(--muted);margin-left:6px;letter-spacing:0}
+.offline{margin:0;font-size:12px;color:var(--warn-fg);background:var(--warn-bg);padding:8px 12px;border-radius:8px}
+.status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted2);flex:none}
+.dot.gps{background:var(--green)} .dot.tz{background:#E5A100} .dot.manual{background:var(--ink)}
+.controls{display:flex;gap:8px}
+.controls select{flex:1;min-width:0;height:40px;border:1px solid var(--line2);background:var(--bg);border-radius:20px;padding:0 36px 0 14px;font-size:13px;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.btn{height:40px;padding:0 16px;border:1px solid var(--line2);background:var(--bg);border-radius:20px;cursor:pointer;white-space:nowrap;font-weight:500;font-size:13px}
+.btn.primary{background:var(--black);color:var(--on-black);border-color:var(--black)}
+.btn:active{opacity:.7}
+
+/* 섹션: 위쪽에 연회색 띠, 제목은 본문 위에 */
+.sec{display:flex;flex-direction:column;gap:12px;padding:20px 16px 24px;border-top:8px solid var(--band)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0}
+.sec-h h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.02em}
+.sec-h span{font-size:12px;color:var(--muted)}
+
+/* 긴급 버튼: 흰 타일 + 가는 선, 숫자만 크게 */
+.sos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sos.one{grid-template-columns:1fr}
+.call{display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-height:116px;padding:14px 14px 12px;border-radius:12px;
+  border:1px solid var(--line2);background:var(--bg);text-decoration:none;position:relative;min-width:0}
+.call .lbl{font-size:13px;font-weight:500;color:var(--ink2)}
+.call .num{font-weight:800;font-size:38px;line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.call .sub{font-size:12px;color:var(--muted)}
+.call::after{content:"";position:absolute;right:14px;top:14px;width:16px;height:16px;opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z'/%3E%3C/svg%3E") center/contain no-repeat}
+.sos.one .call{flex-direction:row;align-items:center;min-height:0;padding:0;border:0;border-radius:12px;background:var(--black);color:var(--on-black)}
+.sos.one .call .lbl,.sos.one .call .sub{color:inherit}
+.sos.one .call .sub{opacity:.6}
+.sos.one .call>div{padding:18px 20px}
+.sos.one .num{font-size:56px;margin-left:auto;padding:14px 22px 14px 0}
+.sos.one .call::after{display:none}
+.call:active{opacity:.75}
+.extras{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line2);background:var(--bg);text-decoration:none;font-size:12px;color:var(--ink2)}
+.chip b{font-weight:700;font-variant-numeric:tabular-nums;font-size:13px;color:var(--ink)}
+.note{font-size:12px;color:var(--muted);margin:0}
+.warn{background:var(--fill);color:var(--ink2);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.55;margin:0}
+
+/* 목록: 선으로만 구분 */
+.card{background:var(--bg)}
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line);text-decoration:none;min-width:0}
+.rows .row:first-child{border-top:0}
+.row .k{min-width:0;flex:1}
+.row .k div{font-weight:500;font-size:14px}
+.row .k p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.row .v{font-weight:700;font-variant-numeric:tabular-nums;font-size:15px;white-space:nowrap;text-align:right;letter-spacing:-.01em}
+.row .v.big{font-size:18px}
+.row .go{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;color:var(--muted2);flex:none}
+.row .go svg{width:18px;height:18px}
+.emb-head{padding:0 0 12px}
+.emb-head div{font-weight:700;font-size:16px;letter-spacing:-.02em}
+.emb-head p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.emb-head p a{color:var(--muted)}
+details{border-top:1px solid var(--line)}
+summary{padding:14px 0;cursor:pointer;font-size:13px;color:var(--ink2);list-style:none;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:12px;height:12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center/contain no-repeat;transition:transform .15s}
+details[open] summary::after{transform:rotate(180deg)}
+details .rows .row:first-child{border-top:0}
+
+/* 가까운 곳: 2열, 선 */
+.near{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.near a{display:flex;flex-direction:column;gap:2px;padding:14px;border:1px solid var(--line2);border-radius:12px;text-decoration:none}
+.near a b{font-size:14px;font-weight:600}
+.near a span{font-size:12px;color:var(--muted)}
+
+/* 내 연락처 */
+.mine-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding-top:14px;border-top:1px solid var(--line)}
+.mine-form input{height:40px;min-width:0;border:1px solid var(--line2);border-radius:8px;padding:0 12px;background:var(--bg);font-size:13px}
+.mine-form input::placeholder{color:var(--muted2)}
+.mine-form .btn{background:var(--black);color:var(--on-black);border-color:var(--black);border-radius:8px}
+.del{border:0;background:none;color:var(--muted);font-size:12px;cursor:pointer;padding:6px 0 6px 8px}
+.empty{padding:0 0 4px;color:var(--muted);font-size:13px;line-height:1.55}
+
+/* 현지인에게 보여주기 (사용자 확정: 유지) */
+.langs{display:flex;flex-wrap:wrap;gap:6px}
+.langs button{height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line2);background:var(--bg);cursor:pointer;font-size:12px}
+.langs button[aria-pressed="true"]{background:var(--black);color:var(--on-black);border-color:var(--black)}
+.say{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.say button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:12px 14px;background:var(--bg);border:1px solid var(--line2);border-radius:12px;cursor:pointer;min-width:0}
+.say button b{font-size:14px;font-weight:600}
+.say button span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.say button.wide{grid-column:1 / -1}
+.show{position:fixed;inset:0;z-index:50;background:var(--show-bg);color:var(--show-fg);display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.show-bar{display:flex;justify-content:space-between;gap:8px}
+.show-bar .btn{background:transparent;color:var(--show-fg);border-color:var(--show-line)}
+.show-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;max-width:640px;width:100%;margin:0 auto;overflow-y:auto;transition:transform .25s}
+.show-body.flip{transform:rotate(180deg)}
+.show-local{font-size:clamp(34px,9vw,60px);font-weight:700;line-height:1.25;text-wrap:balance;margin:0;letter-spacing:-.02em}
+.show-en{font-size:clamp(18px,4.6vw,24px);font-weight:500;margin:0;opacity:.9}
+.show-ko{font-size:15px;margin:0;opacity:.65}
+.show-num{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding-top:18px;border-top:1px solid var(--show-line)}
+.show-num span{font-size:15px;opacity:.75}
+.show-num b{font-weight:800;font-size:clamp(40px,12vw,72px);line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.show-num b.long{font-size:clamp(26px,7.5vw,40px)}
+
+footer{font-size:11px;line-height:1.6;color:var(--muted);display:flex;flex-direction:column;gap:6px;padding:20px 16px 32px;border-top:8px solid var(--band);margin-top:auto}
+footer a{color:var(--muted)}
+@media (max-width:360px){.call .num{font-size:34px}.sos.one .num{font-size:46px}.mine-form{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="where" aria-live="polite">
+    <div class="where-top">
+      <span class="brand">어디서나 SOS</span>
+      <span class="status"><span id="dot" class="dot"></span><span id="statusText">위치 확인 중</span></span>
+    </div>
+    <h1 class="country" id="countryName">—</h1>
+    <p class="offline" id="offline" hidden>오프라인 · 저장된 번호로 표시 중 (전화는 걸려요, 지도는 안 열려요)</p>
+    <div class="controls">
+      <label for="countrySel" class="sr" style="position:absolute;left:-9999px">나라 선택</label>
+      <select id="countrySel"></select>
+      <button class="btn primary" id="locBtn" type="button">현재 위치로</button>
+    </div>
+  </header>
+
+  <section class="sec" aria-labelledby="h-sos" style="border-top:1px solid var(--line)">
+    <div class="sec-h"><h2 id="h-sos">긴급 신고</h2><span id="sosHint">누르면 바로 전화</span></div>
+    <div class="sos" id="sos"></div>
+    <div class="extras" id="extras"></div>
+    <p class="warn" id="confWarn" hidden></p>
+  </section>
+
+  <section class="sec" aria-labelledby="h-say">
+    <div class="sec-h"><h2 id="h-say">현지인에게 보여주기</h2><span>누르면 화면 가득 크게</span></div>
+    <div class="langs" id="langs"></div>
+    <div class="say" id="say"></div>
+    <p class="warn" id="langWarn" hidden>이 언어 문장은 원어민 검수 전이에요. 영어 문장이 함께 표시됩니다.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="h-emb">
+    <div class="sec-h"><h2 id="h-emb">대한민국 대사관·영사관</h2><span id="embHint">근무시간 외엔 긴급번호로</span></div>
+    <div class="card" id="emb"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-near">
+    <div class="sec-h"><h2 id="h-near">가까운 곳 찾기</h2><span id="nearHint">지도 앱이 열려요</span></div>
+    <div class="near" id="near"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-mine">
+    <div class="sec-h"><h2 id="h-mine">내 비상연락처</h2><span>이 기기에만 저장</span></div>
+    <div class="card">
+      <div class="rows" id="mineList"></div>
+      <form class="mine-form" id="mineForm" autocomplete="off">
+        <input id="mineName" placeholder="이름 (예: 엄마)" maxlength="20" required>
+        <input id="minePhone" placeholder="+82 10-1234-5678" inputmode="tel" maxlength="24" required>
+        <button class="btn" type="submit">추가</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="show" id="show" role="dialog" aria-modal="true" aria-label="현지인에게 보여주는 화면" hidden>
+    <div class="show-bar">
+      <button class="btn" id="flipBtn" type="button">화면 뒤집기</button>
+      <button class="btn" id="closeShow" type="button">닫기</button>
+    </div>
+    <div class="show-body" id="showBody"></div>
+  </div>
+
+  <footer>
+    <div id="srcLine"></div>
+    <div>번호 확인일 2026-10-02 · 출처: 외교부 재외공관 홈페이지, 각국 긴급번호 공개자료. 출국 전 <a href="https://www.0404.go.kr" target="_blank" rel="noopener">해외안전여행(0404.go.kr)</a>에서 한 번 더 확인하세요.</div>
+    <div>휴대폰에서는 112가 대부분 나라에서 현지 긴급번호로 연결됩니다(GSM 국제 긴급번호).</div>
+  </footer>
+</div>
+
+<script>
+/* ───────── 데이터 ───────── */
+const CALL_CENTER = {name:"영사콜센터 (24시간)", phone:"+82-2-3210-0404", note:"서울 · 해외 사건사고 상담, 통역"};
+
+const D = {
+KR:{n:"대한민국",police:"112",fire:"119",amb:"119",extra:[["해양 사고","122"],["정부 민원·상담","110"],["질병관리청","1339"]],emb:null,conf:"high"},
+JP:{n:"일본",police:"110",fire:"119",amb:"119",extra:[["해상보안청","118"]],emb:{name:"주일본 대한민국 대사관",city:"도쿄",phone:"+81-3-3452-7611",after:"+81-70-2153-5454",url:"https://overseas.mofa.go.kr/jp-ko/index.do",lat:35.65,lng:139.74},more:[["주일본대사관 영사과","+81-3-3455-2601"]],conf:"high"},
+US:{n:"미국",general:"911",extra:[],emb:{name:"주미국 대한민국 대사관",city:"워싱턴 D.C.",phone:"+1-202-939-5600",after:"+1-202-641-8761",url:"https://overseas.mofa.go.kr/us-ko/index.do",lat:38.9,lng:-77.04},more:[["주미국대사관 영사과","+1-202-939-5653"]],conf:"high"},
+CA:{n:"캐나다",general:"911",extra:[],emb:{name:"주캐나다 대한민국 대사관",city:"오타와",phone:"+1-613-244-5010",after:"+1-613-986-0482",url:"https://overseas.mofa.go.kr/ca-ko/index.do",lat:45.42,lng:-75.7},conf:"high"},
+VN:{n:"베트남",police:"113",fire:"114",amb:"115",extra:[["구조","112"]],emb:{name:"주베트남 대한민국 대사관",city:"하노이",phone:"+84-24-3831-5111",after:"+84-90-402-6126",url:"https://overseas.mofa.go.kr/vn-ko/index.do",lat:21.03,lng:105.85},more:[["대사관 영사(여권·비자)","+84-24-3771-0404"]],conf:"high"},
+TH:{n:"태국",police:"191",fire:"199",amb:"1669",extra:[["관광경찰 (영어)","1155"]],emb:{name:"주태국 대한민국 대사관",city:"방콕",phone:"+66-2-481-6000",after:"+66-81-914-5803",url:"https://overseas.mofa.go.kr/th-ko/index.do",lat:13.76,lng:100.5},conf:"medium"},
+PH:{n:"필리핀",general:"911",extra:[],emb:{name:"주필리핀 대한민국 대사관",city:"마닐라(타기그)",phone:"+63-2-8856-9210",after:"+63-917-817-5703",url:"https://overseas.mofa.go.kr/ph-ko/index.do",lat:14.55,lng:121.05},conf:"high"},
+CN:{n:"중국",police:"110",fire:"119",amb:"120",extra:[["교통사고","122"]],emb:{name:"주중국 대한민국 대사관",city:"베이징",phone:"+86-10-8531-0700",after:"+86-186-1173-0089",url:"https://overseas.mofa.go.kr/cn-ko/index.do",lat:39.95,lng:116.47},conf:"medium"},
+TW:{n:"대만",police:"110",fire:"119",amb:"119",extra:[["해양 사고","118"]],emb:{name:"주타이베이 대한민국 대표부",city:"타이베이",phone:"+886-2-2758-8320",after:"+886-912-069-230",url:"https://overseas.mofa.go.kr/tw-ko/index.do",lat:25.03,lng:121.57},conf:"high"},
+HK:{n:"홍콩",general:"999",extra:[],emb:{name:"주홍콩 대한민국 총영사관",city:"홍콩 (마카오 관할)",phone:"+852-2529-4141",after:"+852-9731-0092",url:"https://overseas.mofa.go.kr/hk-ko/index.do",lat:22.28,lng:114.16},conf:"high"},
+SG:{n:"싱가포르",police:"999",fire:"995",amb:"995",extra:[],emb:{name:"주싱가포르 대한민국 대사관",city:"싱가포르",phone:"+65-6256-1188",after:"+65-9654-3528",url:"https://overseas.mofa.go.kr/sg-ko/index.do",lat:1.31,lng:103.83},conf:"high"},
+MY:{n:"말레이시아",general:"999",extra:[],emb:{name:"주말레이시아 대한민국 대사관",city:"쿠알라룸푸르",phone:"+60-3-4251-2336",after:"+60-17-623-8343",url:"https://overseas.mofa.go.kr/my-ko/index.do",lat:3.16,lng:101.71},conf:"high"},
+ID:{n:"인도네시아",police:"110",fire:"113",amb:"118",extra:[["통합 긴급","112"]],emb:{name:"주인도네시아 대한민국 대사관",city:"자카르타",phone:"+62-21-2967-2555",after:"+62-811-852-446",url:"https://overseas.mofa.go.kr/id-ko/index.do",lat:-6.22,lng:106.82},conf:"medium"},
+KH:{n:"캄보디아",police:"117",fire:"118",amb:"119",extra:[["한-캄 공동전담반 (사기·감금)","+855-14-349-305"]],emb:{name:"주캄보디아 대한민국 대사관",city:"프놈펜",phone:"+855-23-211-900",after:"+855-92-555-235",url:"https://overseas.mofa.go.kr/kh-ko/index.do",lat:11.55,lng:104.92},more:[["대사관 긴급(보조)","+855-93-555-235"]],conf:"medium"},
+LA:{n:"라오스",police:"191",fire:"190",amb:"195",extra:[],emb:{name:"주라오스 대한민국 대사관",city:"비엔티안",phone:"+856-21-352-031",after:"+856-20-5839-0080",url:"https://overseas.mofa.go.kr/la-ko/index.do",lat:17.97,lng:102.63},conf:"medium"},
+MN:{n:"몽골",police:"102",fire:"101",amb:"103",extra:[["재난 통합","105"]],emb:{name:"주몽골 대한민국 대사관",city:"울란바토르",phone:"+976-7007-1020",after:"+976-9911-4119",url:"https://overseas.mofa.go.kr/mn-ko/index.do",lat:47.92,lng:106.92},conf:"low"},
+AU:{n:"호주",general:"000",extra:[["휴대폰 긴급","112"]],emb:{name:"주호주 대한민국 대사관",city:"캔버라",phone:"+61-2-6270-4100",after:"+61-408-815-922",url:"https://overseas.mofa.go.kr/au-ko/index.do",lat:-35.28,lng:149.13},more:[["영사콜센터 무료연결 (호주)","+800-2100-0404"]],conf:"high"},
+NZ:{n:"뉴질랜드",general:"111",extra:[],emb:{name:"주뉴질랜드 대한민국 대사관",city:"웰링턴",phone:"+64-4-473-9073",after:null,url:"https://overseas.mofa.go.kr/nz-ko/index.do",lat:-41.29,lng:174.78},conf:"high"},
+GB:{n:"영국",general:"999",extra:[["통합 긴급","112"],["경찰 (긴급 아님)","101"],["의료 상담 (긴급 아님)","111"]],emb:{name:"주영국 대한민국 대사관",city:"런던",phone:"+44-20-7227-5500",after:"+44-78-7650-6895",url:"https://overseas.mofa.go.kr/gb-ko/index.do",lat:51.5,lng:-0.14},conf:"high"},
+FR:{n:"프랑스",police:"17",fire:"18",amb:"15",extra:[["통합 긴급","112"]],emb:{name:"주프랑스 대한민국 대사관",city:"파리",phone:"+33-1-4753-0101",after:"+33-6-8028-5396",url:"https://overseas.mofa.go.kr/fr-ko/index.do",lat:48.86,lng:2.3},conf:"high"},
+DE:{n:"독일",police:"110",fire:"112",amb:"112",extra:[],emb:{name:"주독일 대한민국 대사관",city:"베를린",phone:"+49-30-260-650",after:"+49-173-407-6943",url:"https://overseas.mofa.go.kr/de-ko/index.do",lat:52.51,lng:13.38},conf:"high"},
+IT:{n:"이탈리아",general:"112",extra:[["국가경찰","113"],["소방","115"],["구급","118"]],emb:{name:"주이탈리아 대한민국 대사관",city:"로마",phone:"+39-06-420-4021",after:"+39-335-185-0499",url:"https://overseas.mofa.go.kr/it-ko/index.do",lat:41.92,lng:12.5},conf:"high"},
+ES:{n:"스페인",general:"112",extra:[["국가경찰","091"],["지역경찰","092"],["치안경비대","062"]],emb:{name:"주스페인 대한민국 대사관",city:"마드리드",phone:"+34-91-353-2000",after:"+34-648-924-695",url:"https://overseas.mofa.go.kr/es-ko/index.do",lat:40.45,lng:-3.69},conf:"high"},
+PT:{n:"포르투갈",general:"112",extra:[],emb:{name:"주포르투갈 대한민국 대사관",city:"리스본",phone:"+351-21-781-7130",after:null,url:"https://overseas.mofa.go.kr/pt-ko/index.do",lat:38.73,lng:-9.15},conf:"high"},
+CH:{n:"스위스",police:"117",fire:"118",amb:"144",extra:[["통합 긴급","112"],["항공 구조 (Rega)","1414"]],emb:{name:"주스위스 대한민국 대사관",city:"베른",phone:"+41-31-356-2444",after:"+41-79-897-4086",url:"https://overseas.mofa.go.kr/ch-ko/index.do",lat:46.94,lng:7.45},conf:"high"},
+CZ:{n:"체코",police:"158",fire:"150",amb:"155",extra:[["통합 긴급","112"],["시경찰","156"]],emb:{name:"주체코 대한민국 대사관",city:"프라하",phone:"+420-234-090-411",after:"+420-725-352-420",url:"https://overseas.mofa.go.kr/cz-ko/index.do",lat:50.09,lng:14.42},conf:"high"},
+AT:{n:"오스트리아",police:"133",fire:"122",amb:"144",extra:[["통합 긴급","112"],["산악 구조","140"]],emb:{name:"주오스트리아 대한민국 대사관",city:"빈",phone:"+43-1-478-1991",after:"+43-664-527-0743",url:"https://overseas.mofa.go.kr/at-ko/index.do",lat:48.2,lng:16.36},more:[["영사콜센터 무료연결","0-800-200-219"]],conf:"high"},
+TR:{n:"튀르키예",general:"112",extra:[],emb:{name:"주튀르키예 대한민국 대사관",city:"앙카라",phone:"+90-312-468-4820",after:"+90-533-203-6535",url:"https://overseas.mofa.go.kr/tr-ko/index.do",lat:39.89,lng:32.86},more:[["대사관 영사민원","+90-312-481-0404"]],conf:"medium"},
+AE:{n:"아랍에미리트",police:"999",fire:"997",amb:"998",extra:[["경찰 (긴급 아님)","901"]],emb:{name:"주아랍에미리트 대한민국 대사관",city:"아부다비",phone:"+971-2-441-1520",after:"+971-50-133-7362",url:"https://overseas.mofa.go.kr/ae-ko/index.do",lat:24.45,lng:54.38},more:[["영사콜센터 무료연결 (UAE)","8000-0282"]],conf:"high"}
+};
+
+/* 대사관 외 공관(총영사관·분관·출장소). [이름, 도시, 위도, 경도, 대표번호, 긴급번호|null]
+   긴급번호가 null이면 해당 공관이 근무시간 외 영사콜센터로 안내하는 곳. 외교부 공관 홈페이지 2026-10-02 확인 */
+const MS = {
+JP:[["주오사카 총영사관","오사카",34.69,135.5,"+81-6-4256-2345","+81-90-3050-0746"],["주요코하마 총영사관","요코하마",35.44,139.64,"+81-45-621-4531",null],["주고베 총영사관","고베",34.69,135.19,"+81-78-221-4853",null],["주나고야 총영사관","나고야",35.17,136.88,"+81-52-586-9221",null],["주후쿠오카 총영사관","후쿠오카",33.59,130.4,"+81-92-771-0461","+81-80-8588-2806"],["주히로시마 총영사관","히로시마",34.39,132.46,"+81-82-505-2100",null],["주센다이 총영사관","센다이",38.27,140.87,"+81-22-221-2751",null],["주삿포로 총영사관","삿포로",43.06,141.35,"+81-11-218-0288",null],["주니가타 총영사관","니가타",37.92,139.04,"+81-25-255-5555",null]],
+US:[["주애틀랜타 총영사관","애틀랜타",33.75,-84.39,"+1-404-522-1611","+1-470-880-1986"],["주보스턴 총영사관","보스턴(뉴턴)",42.34,-71.21,"+1-617-641-2830",null],["주시카고 총영사관","시카고",41.88,-87.63,"+1-312-822-9485","+1-312-405-4425"],["주호놀룰루 총영사관","호놀룰루",21.31,-157.86,"+1-808-595-6109","+1-808-265-9349"],["주휴스턴 총영사관","휴스턴",29.76,-95.37,"+1-713-961-0186","+1-281-785-4231"],["주로스앤젤레스 총영사관","로스앤젤레스",34.05,-118.24,"+1-213-385-9300","+1-213-700-1147"],["주뉴욕 총영사관","뉴욕",40.71,-74.01,"+1-646-674-6000","+1-646-965-3639"],["주샌프란시스코 총영사관","샌프란시스코",37.77,-122.42,"+1-408-351-7767","+1-415-265-4859"],["주시애틀 총영사관","시애틀",47.61,-122.33,"+1-206-441-1011",null],["앵커리지 출장소","앵커리지",61.22,-149.9,"+1-907-339-7955",null],["하갓냐 출장소","괌(타무닝)",13.49,144.78,"+1-671-647-6488",null],["댈러스 출장소","댈러스",32.78,-96.8,"+1-972-701-0180",null],["필라델피아 출장소","필라델피아",39.95,-75.17,"+1-267-807-1830",null]],
+CN:[["주상하이 총영사관","상하이",31.23,121.47,"+86-21-6295-5000","+86-138-1650-9503"],["주광저우 총영사관","광저우",23.13,113.26,"+86-20-2919-2999","+86-139-2247-3457"],["주칭다오 총영사관","칭다오",36.07,120.38,"+86-532-8897-6001","+86-186-6026-5087"],["주선양 총영사관","선양",41.81,123.43,"+86-24-2385-3388","+86-138-0400-6338"],["주청두 총영사관","청두",30.57,104.07,"+86-28-8616-5800","+86-139-8095-6348"],["주시안 총영사관","시안",34.34,108.94,"+86-29-8835-1001",null],["주우한 총영사관","우한",30.59,114.31,"+86-27-8556-1085","+86-159-2626-1124"],["다롄 출장소","다롄",38.91,121.61,"+86-411-8235-6288","+86-158-4085-1230"]],
+VN:[["주호치민 총영사관","호치민",10.78,106.7,"+84-28-3822-5757","+84-93-850-0238"],["주다낭 총영사관","다낭",16.05,108.22,"+84-236-356-6100",null]],
+CA:[["주밴쿠버 총영사관","밴쿠버",49.28,-123.12,"+1-604-681-9581",null],["주토론토 총영사관","토론토",43.65,-79.38,"+1-416-920-3809","+1-416-994-4490"],["주몬트리올 총영사관","몬트리올",45.5,-73.57,"+1-514-845-2555",null]],
+AU:[["주시드니 총영사관","시드니",-33.87,151.21,"+61-2-9210-0200","+61-403-546-058"],["멜번 분관","멜버른",-37.81,144.96,"+61-3-9533-3800",null],["브리즈번 출장소","브리즈번",-27.47,153.03,"+61-7-3221-1440",null]],
+NZ:[["오클랜드 분관","오클랜드",-36.85,174.76,"+64-9-379-0818",null]],
+DE:[["주프랑크푸르트 총영사관","프랑크푸르트",50.11,8.68,"+49-69-956-7520","+49-173-363-4854"],["주함부르크 총영사관","함부르크",53.55,9.99,"+49-40-650-677-600",null],["본 분관","본",50.73,7.1,"+49-228-943-790","+49-170-337-9105"]],
+IT:[["주밀라노 총영사관","밀라노",45.46,9.19,"+39-02-2906-2641",null]],
+ES:[["주바르셀로나 총영사관","바르셀로나",41.39,2.17,"+34-93-487-3153",null],["라스팔마스 분관","라스팔마스",28.12,-15.43,"+34-928-250-404","+34-680-770-404"]],
+TR:[["주이스탄불 총영사관","이스탄불",41.01,28.98,"+90-212-368-8368","+90-534-053-3849"]],
+PH:[["세부 분관","세부",10.32,123.89,"+63-32-231-1516",null]],
+MY:[["코타키나발루 분관","코타키나발루",5.98,116.07,"+60-88-206-110",null]],
+AE:[["주두바이 총영사관","두바이",25.2,55.27,"+971-4-344-9200","+971-50-553-2816"]],
+ID:[["발리 분관","발리",-8.75,115.21,"+62-361-9588-040",null]],
+KH:[["시엠립 분관","시엠립",13.36,103.86,"+855-63-990-400",null]]
+};
+
+/* 현지인에게 보여줄 문장. 순서: 도와주세요 / 경찰 / 구급차 / 병원 / 한국인·대사관 */
+const PHRASE_KO=["도와주세요!","경찰을 불러 주세요.","구급차를 불러 주세요.","병원에 데려가 주세요.","저는 한국인입니다. 한국 대사관에 연락해 주세요."];
+const PHRASE_ICON=["help","police","amb","hosp","emb"];
+const L = {
+en:{n:"English",p:["Please help me!","Please call the police.","Please call an ambulance.","Please take me to a hospital.","I am Korean. Please contact the Korean embassy."]},
+ja:{n:"日本語",p:["助けてください！","警察を呼んでください。","救急車を呼んでください。","病院に連れて行ってください。","私は韓国人です。韓国大使館に連絡してください。"]},
+"zh-CN":{n:"简体中文",p:["请帮帮我！","请帮我报警。","请帮我叫救护车。","请带我去医院。","我是韩国人，请联系韩国大使馆。"]},
+"zh-TW":{n:"繁體中文",p:["請幫幫我！","請幫我報警。","請幫我叫救護車。","請帶我去醫院。","我是韓國人，請聯絡韓國駐台北代表部。"]},
+"zh-HK":{n:"廣東話",p:["請幫幫我！","請幫我報警。","請幫我叫救護車。","請帶我去醫院。","我係韓國人，請聯絡韓國總領事館。"]},
+vi:{n:"Tiếng Việt",p:["Xin hãy giúp tôi!","Xin hãy gọi công an giúp tôi.","Xin hãy gọi xe cấp cứu giúp tôi.","Xin hãy đưa tôi đến bệnh viện.","Tôi là người Hàn Quốc. Xin hãy liên lạc với Đại sứ quán Hàn Quốc."]},
+th:{n:"ภาษาไทย",p:["ช่วยด้วย!","กรุณาเรียกตำรวจให้หน่อย","กรุณาเรียกรถพยาบาลให้หน่อย","กรุณาพาฉันไปโรงพยาบาล","ฉันเป็นคนเกาหลี กรุณาติดต่อสถานทูตเกาหลีให้หน่อย"]},
+tl:{n:"Filipino",p:["Tulungan po ninyo ako!","Pakitawag po ang pulis.","Pakitawag po ng ambulansya.","Pakidala po ako sa ospital.","Ako po ay Koreano. Pakikontak po ang Embahada ng Korea."]},
+ms:{n:"Bahasa Melayu",p:["Tolong saya!","Tolong panggil polis.","Tolong panggil ambulans.","Tolong bawa saya ke hospital.","Saya orang Korea. Tolong hubungi Kedutaan Besar Korea."]},
+id:{n:"Bahasa Indonesia",p:["Tolong saya!","Tolong panggilkan polisi.","Tolong panggilkan ambulans.","Tolong antar saya ke rumah sakit.","Saya orang Korea. Tolong hubungi Kedutaan Besar Korea."]},
+km:{n:"ភាសាខ្មែរ",chk:1,p:["ជួយខ្ញុំផង!","សូមហៅប៉ូលិសឲ្យខ្ញុំផង។","សូមហៅឡានពេទ្យឲ្យខ្ញុំផង។","សូមនាំខ្ញុំទៅមន្ទីរពេទ្យ។","ខ្ញុំជាជនជាតិកូរ៉េ។ សូមទាក់ទងស្ថានទូតកូរ៉េ។"]},
+lo:{n:"ພາສາລາວ",chk:1,p:["ຊ່ວຍແດ່!","ກະລຸນາເອີ້ນຕຳຫຼວດໃຫ້ແດ່.","ກະລຸນາເອີ້ນລົດໂຮງໝໍໃຫ້ແດ່.","ກະລຸນາພາຂ້ອຍໄປໂຮງໝໍ.","ຂ້ອຍເປັນຄົນເກົາຫຼີ. ກະລຸນາຕິດຕໍ່ສະຖານທູດເກົາຫຼີ."]},
+mn:{n:"Монгол",chk:1,p:["Туслаарай!","Цагдаа дуудаж өгөөч.","Түргэн тусламж дуудаж өгөөч.","Намайг эмнэлэг рүү хүргэж өгөөч.","Би Солонгос хүн. Солонгосын Элчин сайдын яамтай холбогдож өгөөч."]},
+fr:{n:"Français",p:["Aidez-moi, s'il vous plaît !","Appelez la police, s'il vous plaît.","Appelez une ambulance, s'il vous plaît.","Emmenez-moi à l'hôpital, s'il vous plaît.","Je suis coréen(ne). Contactez l'ambassade de Corée, s'il vous plaît."]},
+de:{n:"Deutsch",p:["Bitte helfen Sie mir!","Bitte rufen Sie die Polizei.","Bitte rufen Sie einen Krankenwagen.","Bitte bringen Sie mich ins Krankenhaus.","Ich komme aus Korea. Bitte kontaktieren Sie die koreanische Botschaft."]},
+it:{n:"Italiano",p:["Aiutatemi, per favore!","Chiamate la polizia, per favore.","Chiamate un'ambulanza, per favore.","Portatemi in ospedale, per favore.","Sono coreano/a. Contattate l'ambasciata coreana, per favore."]},
+es:{n:"Español",p:["¡Ayúdeme, por favor!","Llame a la policía, por favor.","Llame a una ambulancia, por favor.","Lléveme al hospital, por favor.","Soy coreano/a. Contacte con la embajada de Corea, por favor."]},
+pt:{n:"Português",p:["Ajude-me, por favor!","Chame a polícia, por favor.","Chame uma ambulância, por favor.","Leve-me ao hospital, por favor.","Sou coreano/a. Contacte a embaixada da Coreia, por favor."]},
+cs:{n:"Čeština",p:["Pomozte mi, prosím!","Zavolejte prosím policii.","Zavolejte prosím záchranku.","Odvezte mě prosím do nemocnice.","Jsem z Koreje. Kontaktujte prosím korejské velvyslanectví."]},
+tr:{n:"Türkçe",p:["Lütfen bana yardım edin!","Lütfen polisi arayın.","Lütfen ambulans çağırın.","Lütfen beni hastaneye götürün.","Ben Koreliyim. Lütfen Kore Büyükelçiliği ile iletişime geçin."]},
+ar:{n:"العربية",dir:"rtl",p:["ساعدوني من فضلكم!","من فضلك اتصل بالشرطة.","من فضلك اطلب سيارة إسعاف.","من فضلك خذني إلى المستشفى.","أنا كوري. من فضلك اتصل بالسفارة الكورية."]}
+};
+const LANGS={KR:["en","ja","zh-CN"],JP:["ja"],US:["en","es"],CA:["en","fr"],VN:["vi"],TH:["th"],PH:["tl","en"],CN:["zh-CN"],TW:["zh-TW"],HK:["zh-HK","en"],SG:["en","zh-CN","ms"],MY:["ms","en"],ID:["id"],KH:["km","en"],LA:["lo","en"],MN:["mn","en"],AU:["en"],NZ:["en"],GB:["en"],FR:["fr"],DE:["de"],IT:["it"],ES:["es"],PT:["pt"],CH:["de","fr","it"],CZ:["cs"],AT:["de"],TR:["tr"],AE:["ar","en"]};
+
+/* 나라별 기준점(주요 도시). GPS 좌표에서 가장 가까운 점의 나라를 고른다 */
+const P = {
+KR:"37.57,126.98 35.18,129.08 33.5,126.53 35.16,126.85 37.75,128.9 36.35,127.38",
+JP:"35.68,139.76 34.69,135.5 33.59,130.4 43.06,141.35 26.21,127.68 38.27,140.87 35.18,136.9 34.39,132.46 31.6,130.56 33.84,132.77 39.7,141.15 44.35,143.35",
+US:"40.71,-74 34.05,-118.24 41.88,-87.63 29.76,-95.37 25.76,-80.19 47.6,-122.33 39.74,-104.99 33.75,-84.39 37.77,-122.42 36.17,-115.14 21.31,-157.86 61.22,-149.9 13.44,144.79 15.18,145.75 33.45,-112.07 32.78,-96.8 44.98,-93.27 42.36,-71.06 38.9,-77.04 39.1,-94.58 38.63,-90.2 40.76,-111.89 43.62,-116.2 45.78,-108.5 35.08,-106.65 35.47,-97.52 36.16,-86.78 35.23,-80.84 28.54,-81.38 29.95,-90.07 45.52,-122.68 46.88,-96.79 41.26,-95.93 42.33,-83.05 42.89,-78.88 40.44,-80 58.3,-134.42 64.84,-147.72 31.76,-106.49 29.42,-98.49 39.53,-119.81 38.58,-121.49 32.72,-117.16 43.04,-87.91 44.8,-68.77 46.6,-112.03",
+CA:"43.65,-79.38 49.28,-123.12 45.5,-73.57 51.05,-114.07 45.42,-75.7 53.55,-113.49 49.9,-97.14 44.65,-63.57 46.81,-71.21 60.72,-135.06 62.45,-114.37 50.45,-104.6 52.13,-106.67 48.38,-89.25 63.75,-68.52 47.56,-52.71 46.49,-80.99 48.43,-123.37 58.77,-94.17",
+VN:"21.03,105.85 10.82,106.63 16.05,108.2 12.24,109.19 10.23,103.96 20.86,106.68 11.94,108.44 22.34,103.84 18.68,105.68",
+TH:"13.76,100.5 18.79,98.99 7.88,98.39 12.93,100.88 8.09,98.91 17.41,102.79 7.01,100.47 14.97,102.1 9.54,100.06",
+PH:"14.6,120.98 10.32,123.89 11.97,121.92 7.19,125.46 16.4,120.6 15.18,120.53 9.65,123.85 9.74,118.74 18.2,120.59",
+CN:"39.9,116.4 31.23,121.47 23.13,113.26 22.54,114.06 30.57,104.07 36.07,120.38 34.34,108.94 45.8,126.53 41.8,123.43 42.9,129.5 25.04,102.71 30.59,114.3 43.83,87.62 29.65,91.1 38.91,121.6 24.48,118.09 18.25,109.5 39.47,75.99 36.06,103.83 36.62,101.78 40.84,111.75 36.4,94.9 22.82,108.32 26.65,106.63 28.23,112.94 34.75,113.62 36.65,117.12 32.06,118.8 30.27,120.15 26.07,119.3 31.82,117.23 28.68,115.86 37.87,112.55 43.82,125.32 49.21,119.77 42.82,93.51 32.5,80.1",
+TW:"25.03,121.57 22.63,120.3 24.15,120.67 23.99,121.6 23,120.2",
+HK:"22.32,114.17 22.28,114.16 22.31,113.92 22.2,113.54",
+SG:"1.35,103.82",
+MY:"3.14,101.69 5.41,100.33 5.98,116.07 1.55,110.36 1.49,103.74 6.35,99.8 2.19,102.25 4.6,101.08 3.81,103.33",
+ID:"-6.2,106.85 -8.65,115.22 -7.25,112.75 3.6,98.67 1.13,104.05 -7.8,110.36 -5.15,119.43 -8.58,116.12 -6.91,107.61 1.47,124.84 -2.53,140.7 -0.95,100.35 -3.32,114.59 -10.16,123.6",
+KH:"11.56,104.92 13.36,103.86 10.63,103.5 13.1,103.2",
+LA:"17.97,102.63 19.89,102.13 18.92,102.45 15.12,105.8",
+MN:"47.89,106.91 48,91.64 49.47,105.97 43.57,104.42 48.07,114.53 49.98,92.07 49.64,100.16 46.37,96.26",
+AU:"-33.87,151.21 -37.81,144.96 -27.47,153.03 -31.95,115.86 -34.93,138.6 -16.92,145.77 -12.46,130.84 -35.28,149.13 -42.88,147.33 -28.02,153.4 -23.7,133.88 -17.96,122.24 -20.73,139.49 -19.26,146.82 -30.75,121.47 -25.34,131.04",
+NZ:"-36.85,174.76 -41.29,174.78 -43.53,172.64 -45.03,168.66 -38.14,176.25 -45.87,170.5",
+GB:"51.51,-0.13 53.48,-2.24 55.95,-3.19 55.86,-4.25 52.49,-1.89 53.41,-2.98 51.45,-2.59 51.48,-3.18 54.6,-5.93 54.98,-1.62 57.48,-4.22 51.13,1.31 50.37,-4.14",
+FR:"48.86,2.35 45.76,4.84 43.3,5.37 43.7,7.27 44.84,-0.58 43.6,1.44 48.57,7.75 50.63,3.06 47.22,-1.55 48.11,-1.68 50.95,1.86 43.61,3.88 41.93,8.74 45.92,6.87 47.32,5.04",
+DE:"52.52,13.4 48.14,11.58 50.11,8.68 53.55,9.99 50.94,6.96 48.78,9.18 51.05,13.74 51.34,12.37 49.45,11.08 52.37,9.73 47.99,7.84 51.23,6.77 53.08,8.8 54.09,12.1",
+IT:"41.9,12.5 45.46,9.19 45.44,12.32 43.77,11.26 40.85,14.27 45.07,7.69 44.49,11.34 38.12,13.36 41.12,16.87 37.5,15.09 39.22,9.12 45.44,10.99 46.5,11.35 40.63,14.6",
+ES:"40.42,-3.7 41.39,2.17 37.39,-5.98 39.47,-0.38 37.18,-3.6 43.26,-2.93 36.72,-4.42 39.57,2.65 42.88,-8.54 28.12,-15.43 28.47,-16.25 41.65,-0.88 40.97,-5.66",
+PT:"38.72,-9.14 41.15,-8.61 37.02,-7.93 40.2,-8.41 32.65,-16.91 37.74,-25.67 41.55,-8.42 38.57,-7.91",
+CH:"46.95,7.45 47.38,8.54 46.2,6.14 47.56,7.59 47.05,8.31 46.69,7.86 46.02,7.75 46,8.95 46.52,6.63 46.5,9.84",
+CZ:"50.08,14.44 49.2,16.61 48.81,14.32 50.23,12.87 49.82,18.26 49.74,13.38 49.59,17.25",
+AT:"48.21,16.37 47.81,13.04 47.27,11.39 47.07,15.44 48.31,14.29 47.56,13.65 46.62,14.31",
+TR:"41.01,28.98 39.93,32.86 38.42,27.14 36.9,30.7 38.64,34.83 41,39.72 37.03,27.43 37.92,29.12 37.91,40.23 39.9,41.27 38.5,43.38 37,35.32",
+AE:"24.45,54.38 25.2,55.27 25.35,55.42 24.21,55.74 25.79,55.94 25.12,56.33"
+};
+const PTS = [];
+for (const [c,s] of Object.entries(P)) s.split(" ").forEach(p=>{const [a,b]=p.split(",").map(Number);PTS.push([c,a,b])});
+
+/* 기기 시간대 → 나라 (위치 권한이 없을 때 쓰는 추정) */
+const TZ = {"Asia/Seoul":"KR","Asia/Tokyo":"JP","Asia/Ho_Chi_Minh":"VN","Asia/Saigon":"VN","Asia/Bangkok":"TH","Asia/Manila":"PH",
+"Asia/Shanghai":"CN","Asia/Chongqing":"CN","Asia/Harbin":"CN","Asia/Urumqi":"CN","Asia/Taipei":"TW","Asia/Hong_Kong":"HK","Asia/Singapore":"SG",
+"Asia/Kuala_Lumpur":"MY","Asia/Kuching":"MY","Asia/Jakarta":"ID","Asia/Makassar":"ID","Asia/Jayapura":"ID","Asia/Pontianak":"ID",
+"Asia/Phnom_Penh":"KH","Asia/Vientiane":"LA","Asia/Ulaanbaatar":"MN","Asia/Hovd":"MN","Asia/Choibalsan":"MN","Asia/Dubai":"AE",
+"Europe/London":"GB","Europe/Paris":"FR","Europe/Berlin":"DE","Europe/Rome":"IT","Europe/Madrid":"ES","Atlantic/Canary":"ES","Africa/Ceuta":"ES",
+"Europe/Lisbon":"PT","Atlantic/Madeira":"PT","Atlantic/Azores":"PT","Europe/Zurich":"CH","Europe/Prague":"CZ","Europe/Vienna":"AT",
+"Europe/Istanbul":"TR","Asia/Istanbul":"TR","Pacific/Auckland":"NZ","Pacific/Guam":"US","Pacific/Saipan":"US","Pacific/Honolulu":"US"};
+function tzCountry(tz){
+  if(!tz) return null;
+  if(TZ[tz]) return TZ[tz];
+  if(tz.startsWith("Australia/")) return "AU";
+  if(/^America\/(Toronto|Vancouver|Montreal|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Moncton|Whitehorse|Yellowknife|Iqaluit|Glace_Bay|Goose_Bay|Swift_Current|Dawson|Inuvik|Rankin_Inlet|Thunder_Bay|Cambridge_Bay)/.test(tz)) return "CA";
+  if(/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Juneau|Indiana|Kentucky|North_Dakota|Menominee|Nome|Sitka|Adak)/.test(tz)) return "US";
+  return null;
+}
+
+/* ───────── 유틸 ───────── */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tel = n=>"tel:"+String(n).replace(/[^\d+]/g,"");
+function km(a1,o1,a2,o2){const R=6371,r=Math.PI/180,da=(a2-a1)*r,dO=(o2-o1)*r;
+  const h=Math.sin(da/2)**2+Math.cos(a1*r)*Math.cos(a2*r)*Math.sin(dO/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+function nearestByCountry(lat,lng){const best={};
+  for(const [c,a,b] of PTS){const d=km(lat,lng,a,b);if(best[c]==null||d<best[c])best[c]=d;}
+  return Object.entries(best).sort((x,y)=>x[1]-y[1]);}
+const store={get(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f}catch(e){return f}},
+             set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const ICON_CALL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
+/* ───────── 상태 ───────── */
+const state={code:null,source:null,lat:null,lng:null,dist:null};
+
+/* ───────── 렌더 ───────── */
+function render(){
+  const c=state.code, d=D[c];
+  $("#countrySel").value=c||"";
+  const dot=$("#dot"); dot.className="dot "+({gps:"gps",tz:"tz",manual:"manual"}[state.source]||"");
+  const st={gps:"GPS로 감지",tz:"기기 시간대로 추정",manual:"직접 선택",none:"위치를 알 수 없음"}[state.source]||"위치 확인 중";
+  $("#statusText").textContent = st + (state.source==="gps"&&state.border?" · 경계 지역일 수 있음":"");
+
+  if(!d){ renderUnknown(); return; }
+  $("#countryName").innerHTML = esc(d.n)+"<small>"+c+"</small>";
+
+  // 긴급 버튼
+  const sos=$("#sos");
+  if(d.general){
+    sos.className="sos one";
+    sos.innerHTML=`<a class="call unified" href="${tel(d.general)}"><div><div class="lbl">경찰 · 소방 · 구급</div><div class="sub">통합 긴급번호</div></div><span class="num" style="margin-left:auto">${esc(d.general)}</span></a>`;
+  }else{
+    sos.className="sos";
+    sos.innerHTML=[["police","경찰",d.police],["fire","소방",d.fire],["amb","구급",d.amb]]
+      .map(([k,l,n])=>`<a class="call ${k}" href="${tel(n)}"><span class="lbl">${l}</span><span class="num">${esc(n)}</span></a>`).join("");
+  }
+  $("#extras").innerHTML=(d.extra||[]).map(([l,n])=>`<a class="chip" href="${tel(n)}">${esc(l)} <b>${esc(n)}</b></a>`).join("");
+  const w=$("#confWarn");
+  if(d.conf!=="high"){w.hidden=false;w.textContent=d.conf==="low"
+    ?"이 나라 번호는 자료마다 다르게 나와요. 도착하면 숙소나 현지인에게 한 번 확인하세요. 휴대폰에서는 112도 시도해 보세요."
+    :"현지 신고 번호 일부는 공식 출처로 확인하지 못했어요. 대사관 번호는 외교부 홈페이지 기준입니다.";}
+  else w.hidden=true;
+
+  // 대사관
+  renderEmbassy(d);
+  renderPhrases();
+  renderNear();
+}
+
+function row(label,sub,num,big){
+  return `<a class="row" href="${tel(num)}"><div class="k"><div>${esc(label)}</div>${sub?`<p>${esc(sub)}</p>`:""}</div>
+    <span class="v${big?" big":""}">${esc(num)}</span><span class="go">${ICON_CALL}</span></a>`;
+}
+function missionsOf(c){
+  const d=D[c]; if(!d||!d.emb) return [];
+  const e=d.emb;
+  const list=[{name:e.name.replace(" 대한민국 "," "),city:e.city,lat:e.lat,lng:e.lng,phone:e.phone,after:e.after,main:true,url:e.url}];
+  (MS[c]||[]).forEach(([name,city,lat,lng,phone,after])=>list.push({name,city,lat,lng,phone,after,main:false}));
+  if(state.source==="gps"&&state.lat!=null){
+    list.forEach(m=>m.km=km(state.lat,state.lng,m.lat,m.lng));
+    list.sort((a,b)=>a.km-b.km);
+  }
+  return list;
+}
+const kmTxt=m=>m.km==null?"":(m.km<1?"1km 이내":"약 "+(m.km<20?m.km.toFixed(1):Math.round(m.km))+"km");
+function nearestMission(c){const l=missionsOf(c);return l.length?l[0]:null;}
+
+function renderEmbassy(d){
+  const box=$("#emb");
+  const gps=state.source==="gps"&&state.lat!=null;
+  if(!d.emb){
+    $("#embHint").textContent="해외에서 자동으로 바뀌어요";
+    box.innerHTML=`<div class="emb-head"><div>국내에 있어요</div><p>해외에 나가면 그 나라의 대사관·영사관 번호로 바뀝니다.</p></div>
+      <div class="rows">${row(CALL_CENTER.name,"해외에 있는 가족·지인 일로 상담할 때",CALL_CENTER.phone)}</div>`;
+    return;
+  }
+  const list=missionsOf(state.code), top=list[0], embassy=list.find(m=>m.main);
+  const multi=list.length>1;
+  $("#embHint").textContent = !multi ? "근무시간 외엔 긴급번호로" : gps ? "내 위치에서 가장 가까운 공관" : "위치를 켜면 가까운 공관이 위로 와요";
+
+  let h=`<div class="emb-head"><div>${esc(gps&&multi?top.name:d.emb.name)}</div><p>${esc(top.city)}${gps&&multi?" · "+kmTxt(top):""}${top.url?` · <a href="${top.url}" target="_blank" rel="noopener">홈페이지</a>`:""}</p></div><div class="rows">`;
+  if(top.after) h+=row("긴급 · 사건사고","근무시간 외 24시간 당직",top.after,true);
+  h+=row("대표번호","평일 근무시간",top.phone);
+  if(!top.main && embassy){
+    h+=row(embassy.name, embassy.city+" · "+(embassy.after?"긴급 당직":"대표번호"), embassy.after||embassy.phone);
+  }
+  h+=row(CALL_CENTER.name, CALL_CENTER.note+(top.after?"":" · 이 공관은 근무시간 외 여기로 안내"), CALL_CENTER.phone, !top.after);
+  h+="</div>";
+
+  const rest=list.slice(1).filter(m=>!(m.main&&!top.main));  // 대사관은 위에서 이미 보여줌
+  const more=d.more||[];
+  if(rest.length||more.length){
+    h+=`<details><summary>${rest.length?`다른 공관 ${rest.length}곳`:""}${rest.length&&more.length?" · ":""}${more.length?`기타 번호 ${more.length}개`:""}</summary><div class="rows">`+
+      rest.map(m=>row(m.name, [m.city, kmTxt(m), m.after?"긴급 당직":"대표번호"].filter(Boolean).join(" · "), m.after||m.phone)).join("")+
+      more.map(([l,n,s])=>row(l,s||"",n)).join("")+`</div></details>`;
+  }
+  box.innerHTML=h;
+}
+
+/* ───────── 현지인에게 보여주기 ───────── */
+const langState={};
+function curLang(){const ls=LANGS[state.code]||["en"];const l=langState[state.code];return ls.includes(l)?l:ls[0];}
+function renderPhrases(){
+  const ls=LANGS[state.code]||["en"], lang=curLang(), Lg=L[lang];
+  const lb=$("#langs");
+  lb.hidden=ls.length<2;
+  lb.innerHTML=ls.map(k=>`<button type="button" data-lang="${k}" aria-pressed="${k===lang}">${esc(L[k].n)}</button>`).join("");
+  const idx=state.code==="KR"?[0,1,2,3]:[0,1,2,3,4];
+  $("#say").innerHTML=idx.map(i=>`<button type="button" data-i="${i}" class="${i===4?"wide":""}"><b>${PHRASE_KO[i]}</b><span lang="${lang}" dir="${Lg.dir||"ltr"}">${esc(Lg.p[i])}</span></button>`).join("");
+  $("#langWarn").hidden=!Lg.chk;
+}
+$("#langs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;langState[state.code]=b.dataset.lang;renderPhrases();});
+let lastFocus=null;
+function openShow(i){
+  const lang=curLang(), Lg=L[lang], d=D[state.code];
+  let label, num;
+  if(i===4){
+    const m=nearestMission(state.code);
+    if(m&&m.after){label=m.name+" 긴급";num=m.after;}
+    else{label="한국 영사콜센터 (24시간)";num=CALL_CENTER.phone;}
+  }else if(!d){label="Emergency";num="112";}
+  else if(i===2||i===3){label="구급 · Ambulance";num=d.general||d.amb;}
+  else{label="경찰 · Police";num=d.general||d.police;}
+  $("#showBody").innerHTML=
+    `<p class="show-local" lang="${lang}" dir="${Lg.dir||"ltr"}">${esc(Lg.p[i])}</p>`+
+    (lang!=="en"?`<p class="show-en" lang="en">${esc(L.en.p[i])}</p>`:"")+
+    `<p class="show-ko">${PHRASE_KO[i]}</p>`+
+    `<div class="show-num"><span>${esc(label)}</span><b class="${num.length>6?"long":""}">${esc(num)}</b></div>`;
+  $("#showBody").classList.remove("flip");
+  lastFocus=document.activeElement;
+  $("#show").hidden=false; document.body.style.overflow="hidden"; $("#closeShow").focus();
+}
+function closeShow(){$("#show").hidden=true;document.body.style.overflow="";if(lastFocus)lastFocus.focus();}
+$("#say").addEventListener("click",e=>{const b=e.target.closest("button");if(b)openShow(+b.dataset.i);});
+$("#closeShow").addEventListener("click",closeShow);
+$("#flipBtn").addEventListener("click",()=>$("#showBody").classList.toggle("flip"));
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#show").hidden)closeShow();});
+
+function renderUnknown(){
+  $("#countryName").innerHTML="지원 지역 밖";
+  const sos=$("#sos"); sos.className="sos one";
+  sos.innerHTML=`<a class="call unified" href="tel:112"><div><div class="lbl">휴대폰 국제 긴급번호</div><div class="sub">대부분 나라에서 현지 긴급번호로 연결</div></div><span class="num" style="margin-left:auto">112</span></a>`;
+  $("#extras").innerHTML="";
+  const w=$("#confWarn"); w.hidden=false; w.textContent="이 지역 번호 정보는 아직 없어요. 위에서 나라를 직접 고르거나, 영사콜센터로 전화하면 현지 번호를 안내받을 수 있어요.";
+  $("#emb").innerHTML=`<div class="rows">${row(CALL_CENTER.name,CALL_CENTER.note,CALL_CENTER.phone,true)}</div>`;
+  $("#embHint").textContent="24시간 한국어 상담";
+  renderPhrases();
+  renderNear();
+}
+
+function renderNear(){
+  const c=state.code, has=state.lat!=null;
+  const items = c==="KR"
+    ? [["응급실","응급실","24시간 응급 진료"],["병원","병원","일반 진료"],["경찰서","경찰서","지구대·파출소 포함"],["약국","약국","문 연 약국"]]
+    : c==="CN"
+    ? [["응급실","急诊","急诊"],["병원","医院","医院"],["경찰서","派出所","派出所"],["약국","药店","药店"]]
+    : [["응급실","emergency room","Emergency room"],["병원","hospital","Hospital"],["경찰서","police station","Police station"],["약국","pharmacy","Pharmacy"]];
+  $("#near").innerHTML=items.map(([ko,q,sub])=>{
+    let url;
+    if(c==="KR") url="https://map.naver.com/p/search/"+encodeURIComponent(q);
+    else if(c==="CN") url="https://uri.amap.com/search?keyword="+encodeURIComponent(q)+(has?`&center=${state.lng},${state.lat}`:"")+"&view=map&src=sos";
+    else url=has?`https://www.google.com/maps/search/${encodeURIComponent(q)}/@${state.lat},${state.lng},14z`
+                :"https://www.google.com/maps/search/"+encodeURIComponent(q+" near me");
+    return `<a href="${url}" target="_blank" rel="noopener"><b>${ko}</b><span>${esc(sub)}</span></a>`;
+  }).join("");
+  $("#nearHint").textContent = c==="KR"?"네이버 지도로 열려요":c==="CN"?"가오더 지도로 열려요":has?"내 위치 기준 지도":"지도 앱이 위치를 물어봐요";
+}
+
+/* ───────── 내 비상연락처 ───────── */
+function renderMine(){
+  const list=store.get("sos.mine",[]); const box=$("#mineList");
+  if(!list.length){box.innerHTML=`<div class="empty">아직 없어요. 가족이나 동행자 번호를 국가번호와 함께 넣어 두세요 (한국 휴대폰은 +82 10…).</div>`;return;}
+  box.innerHTML=list.map((m,i)=>`<div class="row"><a href="${tel(m.p)}" style="display:flex;flex:1;min-width:0;justify-content:space-between;gap:12px;text-decoration:none;align-items:center">
+    <div class="k"><div>${esc(m.n)}</div></div><span class="v">${esc(m.p)}</span></a>
+    <button class="del" data-i="${i}" type="button" aria-label="${esc(m.n)} 삭제">삭제</button></div>`).join("");
+}
+$("#mineForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const n=$("#mineName").value.trim(), p=$("#minePhone").value.trim();
+  if(!n||!/\d{3,}/.test(p.replace(/\D/g,""))) return;
+  const list=store.get("sos.mine",[]); list.push({n,p}); store.set("sos.mine",list);
+  $("#mineName").value="";$("#minePhone").value=""; renderMine();
+});
+$("#mineList").addEventListener("click",e=>{
+  const b=e.target.closest(".del"); if(!b) return;
+  const list=store.get("sos.mine",[]); list.splice(+b.dataset.i,1); store.set("sos.mine",list); renderMine();
+});
+
+/* ───────── 위치 판단 ───────── */
+function decideFromCoords(lat,lng){
+  const ranked=nearestByCountry(lat,lng);
+  let [code,dist]=ranked[0];
+  const tzc=tzCountry(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  // 국경 근처: 기기 시간대 나라가 1.5배 거리 안에 있으면 그쪽을 우선
+  if(tzc&&tzc!==code){const alt=ranked.find(r=>r[0]===tzc); if(alt&&alt[1]<dist*1.5+30){code=alt[0];dist=alt[1];}}
+  // 시간대가 지원 안 되는 나라(예: 러시아)를 가리키는데 기준점에서 멀면 → 지원 밖으로
+  const tzName=Intl.DateTimeFormat().resolvedOptions().timeZone||"";
+  if(!tzc&&/\//.test(tzName)&&!/^Etc\//.test(tzName)&&dist>80) code=null;
+  if(dist>600) code=null;
+  const border=!!(code&&tzc&&tzc!==code);
+  return {code,dist,border};
+}
+function useTimezone(){
+  const c=tzCountry(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  Object.assign(state,{code:c,source:c?"tz":"none"}); render();
+}
+function locate(){
+  $("#statusText").textContent="위치 확인 중";
+  if(!("geolocation" in navigator)){ if(!state.code) useTimezone(); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:lat,longitude:lng}=pos.coords;
+    const r=decideFromCoords(lat,lng);
+    Object.assign(state,{lat,lng,code:r.code,dist:r.dist,border:r.border,source:"gps"});
+    store.set("sos.last",{code:r.code,t:Date.now()});
+    render();
+  },()=>{ if(state.source!=="manual") useTimezone(); else render(); },
+  {enableHighAccuracy:false,timeout:9000,maximumAge:5*60*1000});
+}
+
+/* ───────── 시작 ───────── */
+const sel=$("#countrySel");
+sel.innerHTML=`<option value="">나라 직접 고르기</option>`+
+  Object.entries(D).sort((a,b)=>a[1].n.localeCompare(b[1].n,"ko")).map(([c,d])=>`<option value="${c}">${d.n}</option>`).join("");
+sel.addEventListener("change",()=>{ if(!sel.value) return; Object.assign(state,{code:sel.value,source:"manual"}); render(); });
+$("#locBtn").addEventListener("click",locate);
+$("#srcLine").textContent="지원 "+Object.keys(D).length+"개 나라·지역";
+
+useTimezone();   // 즉시: 시간대로 먼저 채우고
+renderMine();
+locate();        // 이어서: GPS로 다듬는다
+
+/* 오프라인 캐시 등록 (HTTPS에서만 동작) */
+if("serviceWorker" in navigator && location.protocol==="https:"){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+/* 오프라인 표시 */
+function netState(){document.documentElement.dataset.offline=navigator.onLine?"":"1";const o=$("#offline");if(o)o.hidden=navigator.onLine;}
+addEventListener("online",netState);addEventListener("offline",netState);netState();
+</script>
+</body>
+</html>
